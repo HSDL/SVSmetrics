@@ -1,5 +1,16 @@
 import numpy
 
+class Corpus(object):
+
+    def __init__(self):
+
+
+class Design(object):
+
+    def __init__(self):
+
+
+
 def quantity():
     asdf = 1
 
