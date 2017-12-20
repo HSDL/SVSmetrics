@@ -2,6 +2,8 @@ import pandas
 import numpy
 import typing
 
+PandasDataFrame = typing.TypeVar('pandas.core.frame.DataFrame')
+
 
 class Corpus(object):
 
@@ -22,7 +24,7 @@ class Corpus(object):
             temp = self.design_data.loc[self.design_data['ParticipantID'] == self.participant_data['ParticipantID'][i]]
             self.participant_data.set_value(i, 'VarietyScore', self._compute_variety(temp, [10, 6, 3, 1]))
 
-    def _compute_variety(self, data, weights) -> float:
+    def _compute_variety(self, data: PandasDataFrame, weights: list) -> float:
         variety = 0
         for i, level in enumerate(self.genealogy_levels):
             variety += weights[i]*len(numpy.unique(data[level]))
@@ -38,12 +40,12 @@ class Corpus(object):
         self.participant_data = pandas.DataFrame({'ParticipantID': unique_participants,
                                                   'VarietyScore': numpy.zeros(len(unique_participants))})
 
-    def _check_table(self):
+    def _check_table(self) -> None:
         # Make sure design identifiers are unique
         if len(numpy.unique(self.design_data['DesignID'])) is not self.design_data.shape[0]:
             raise IndexError('Design IDs are not unique.')
 
-    def _generate_nominal_team(self, size: int, conditions: dict):
+    def _generate_nominal_team(self, size: int, conditions: dict) -> PandasDataFrame:
 
         # Get subset that meets conditions
         temp = self.design_data
