@@ -9,5 +9,6 @@ class Test(unittest.TestCase):
         print("\n")
         temp = SVSmetrics.Corpus(pkg_resources.resource_filename('tests', 'test.csv'))
         temp.compute_individual_variety()
-        print(temp.participant_data.to_string)
+        # print(temp.participant_data.to_string)
+        temp._generate_nominal_team(2, {'Level': '==1'})
         self.assertEqual(True, True)
