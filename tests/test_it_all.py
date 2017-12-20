@@ -7,5 +7,7 @@ class Test(unittest.TestCase):
 
     def test_null(self):
         print("\n")
-        SVSmetrics.Corpus(pkg_resources.resource_filename('tests', 'test.csv'))
+        temp = SVSmetrics.Corpus(pkg_resources.resource_filename('tests', 'test.csv'))
+        temp.compute_individual_variety()
+        print(temp.participant_data.to_string)
         self.assertEqual(True, True)

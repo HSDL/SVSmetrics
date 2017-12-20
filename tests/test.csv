@@ -1,5 +1,9 @@
 DesignID,ParticipantID,Complexity,Analogical,Level,Modality,Strategy,PhysicalPrincipal,WorkingPrincipal,Embodiment
-1,1,1,1,1,1,1,1,4,2
-2,1,2,1,1,1,2,3,3,3
-3,1,1,2,1,1,1,2,2,1
-4,1,2,2,1,1,2,1,1,2
+1,1,1,1,1,1,a,1,4,2
+2,1,2,1,1,1,b,3,3,3
+3,1,1,2,1,1,a,2,2,1
+4,1,2,2,1,1,b,1,1,2
+5,2,1,1,1,1,a,1,4,2
+6,2,2,1,1,1,b,3,3,3
+7,2,1,2,1,1,a,2,2,1
+8,2,2,2,1,1,b,1,1,2
