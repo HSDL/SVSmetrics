@@ -4,6 +4,7 @@ import numpy.random
 import typing
 import itertools
 import matplotlib.pyplot
+import scipy.stats
 
 DataFrame = typing.TypeVar('pandas.core.frame.DataFrame')
 
@@ -93,7 +94,7 @@ class Corpus(object):
             varieties = self.get_condition(number_of_samples, treatments[comb[0]],
                                            treatments[comb[1]], treatments[comb[2]], treatments[comb[3]])
             all_combs.append(comb)
-            all_varieties.append(numpy.mean(varieties))
+            all_varieties.append(varieties)
 
         return all_varieties, all_combs
 
@@ -110,4 +111,7 @@ def individual(camv: list) -> dict:
     return {"Complexity": complexity, "Analogical": analogical_distance, "Modality": modality, "Level": level}
 
 
-
+def plot_varieties(varieties, combinations):
+    # get means and stds
+    m = []
+    std = []
