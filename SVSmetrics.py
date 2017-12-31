@@ -111,7 +111,56 @@ def individual(camv: list) -> dict:
     return {"Complexity": complexity, "Analogical": analogical_distance, "Modality": modality, "Level": level}
 
 
-def plot_varieties(varieties, combinations):
+def plot_varieties(varieties, combinations, combs_to_show=[], sort=False) -> None:
+    ax = matplotlib.pyplot.axes()
+
     # get means and stds
     m = []
     std = []
+    stdem = []
+    for variety in varieties:
+        m.append(numpy.mean(variety))
+        std.append(numpy.std(variety))
+        stdem.append(scipy.stats.sem(variety))
+
+    m = numpy.array(m)
+    std = numpy.array(std)
+    stdem = numpy.array(stdem)
+    combinations = numpy.array(combinations)
+
+    if sort is not False:
+        if sort == "mean":
+            idx = numpy.argsort(m)
+        elif sort == "95+":
+            idx = numpy.argsort(m + 2*std)
+        elif sort == "95-":
+            idx = numpy.argsort(m - 2*std)
+        else:
+            idx = range(len(m))
+
+        print(combinations)
+
+        combinations = combinations[idx, :]
+        m = m[idx]
+        std = std[idx]
+        stdem = stdem[idx]
+
+    ax.set_xticklabels([])
+    ax.set_xticks([])
+
+    ax.bar(range(len(m)), m)
+
+    xt = []
+    xtl = []
+    for comb in combs_to_show:
+        for idx, combination in enumerate(combinations):
+            print(combination, comb, list(combination)==comb)
+            if list(combination) == comb:
+                xt.append(idx)
+                xtl.append(str(comb).replace("[", '').replace(", ", "").replace("]", ""))
+
+    ax.bar(xt, m[xt], color='orange')
+
+    matplotlib.pyplot.xticks(xt, xtl, rotation=45)
+
+    matplotlib.pyplot.show()

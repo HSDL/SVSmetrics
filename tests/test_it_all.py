@@ -19,6 +19,4 @@ class Test(unittest.TestCase):
         # Get all conditions
         v, c = temp.get_all_conditions(100, 4)
 
-        print(v)
-
         self.assertEqual(True, True)
