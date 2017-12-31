@@ -109,6 +109,5 @@ def individual(camv: list) -> dict:
     level = camv[3]
     return {"Complexity": complexity, "Analogical": analogical_distance, "Modality": modality, "Level": level}
 
-def plot
 
 
