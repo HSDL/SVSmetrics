@@ -1,14 +1,14 @@
 import unittest
 import pkg_resources
-import SVSmetrics
+import TeamVariety
 
 
 class Test(unittest.TestCase):
 
     def test_null(self) -> None:
         # Read in the data
-        temp = SVSmetrics.Corpus(pkg_resources.resource_filename('tests', 'designs.csv'),
-                                 pkg_resources.resource_filename('tests', 'participants.csv'))
+        temp = TeamVariety.Corpus(pkg_resources.resource_filename('tests', 'designs.csv'),
+                                  pkg_resources.resource_filename('tests', 'participants.csv'))
 
         # Make sure we're only dealing with one level
         temp.remove_participants("Level", 1)

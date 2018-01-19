@@ -11,8 +11,6 @@ DataFrame = typing.TypeVar('pandas.core.frame.DataFrame')
 
 class Corpus(object):
 
-    genealogy_levels = ['PhysicalPrincipal', 'WorkingPrincipal', 'Embodiment', 'Detail']
-
     def __init__(self, design_file_name: str, participant_file_name: str) -> None:
         # Read in the data
         self.design_data = pandas.read_csv(design_file_name)
@@ -22,16 +20,21 @@ class Corpus(object):
         # Check the table to make sure its ok
         self._check_tables()
 
+        # Define dummies
+        self.genealogy_levels = []
+        self.weights = []
+
     def compute_individual_variety(self) -> None:
         for i in range(self.participant_data.shape[0]):
+            print(self.participant_data['ParticipantID'][i])
             temp = self.design_data.loc[self.design_data['ParticipantID'] == self.participant_data['ParticipantID'][i]]
-            self.participant_data.set_value(i, 'VarietyScore', self._compute_variety(temp, [10, 5, 2, 1]))
+            if temp.shape[0] == 0:
+                self.participant_data.set_value(i, 'VarietyScore', 0)
+            else:
+                self.participant_data.set_value(i, 'VarietyScore', self._compute_variety(temp))
 
-    def _compute_variety(self, data: DataFrame, weights: list) -> float:
+    def _compute_variety(self, data: DataFrame) -> float:
         variety = 0
-        # for i, level in enumerate(self.genealogy_levels):
-        #     variety += weights[i]*len(numpy.unique(data[level]))
-        # variety /= data.shape[0]
         nlast = 1
         for i, level in enumerate(self.genealogy_levels):
             # Remove duplicates
@@ -41,17 +44,18 @@ class Corpus(object):
             n = temp.shape[0]
 
             # Update variety
-            variety += weights[i]*(n-nlast)
+            variety += self.weights[i]*(n-nlast)
             nlast = n
 
         return variety/data.shape[0]
 
     def _check_tables(self) -> None:
         # Make sure design identifiers are unique
-        if len(numpy.unique(self.design_data['DesignID'])) is not self.design_data.shape[0]:
+        if len(numpy.unique(self.design_data['DesignID'])) != self.design_data.shape[0]:
+            print(len(numpy.unique(self.design_data['DesignID'])), self.design_data.shape[0])
             raise IndexError('Design IDs are not unique.')
         # Make sure participant identifiers are unique
-        if len(numpy.unique(self.design_data['ParticipantID'])) is not self.participant_data.shape[0]:
+        if len(numpy.unique(self.design_data['ParticipantID'])) != self.participant_data.shape[0]:
             raise IndexError('Design IDs are not unique.')
 
     def get_individuals(self, condition: dict) -> list:
@@ -84,11 +88,11 @@ class Corpus(object):
                                   self.design_data.loc[self.design_data['ParticipantID'] == m3],
                                   self.design_data.loc[self.design_data['ParticipantID'] == m4]], ignore_index=True)
 
-            varieties.append(self._compute_variety(team, [10, 6, 3, 1]))
+            varieties.append(self._compute_variety(team))
 
         return varieties
 
-    def get_all_conditions(self, number_of_samples, team_size):
+    def get_all_conditions(self, number_of_samples, team_size, treatment_file=None, results_file=None):
         treatments = []
         for c in numpy.unique(self.participant_data["Complexity"]):
             for a in numpy.unique(self.participant_data["Analogical"]):
@@ -96,7 +100,8 @@ class Corpus(object):
                     for v in numpy.unique(self.participant_data["Level"]):
                         treatments.append(individual([c, a, m, v]))
 
-        print(len(treatments))
+        if treatment_file is not None:
+            pandas.DataFrame(treatments).to_csv(treatment_file)
 
         all_combs = []
         all_varieties = []
@@ -107,10 +112,18 @@ class Corpus(object):
             all_combs.append(comb)
             all_varieties.append(varieties)
 
-        return all_varieties, all_combs
+        if results_file is not None:
+            variety_scores = pandas.DataFrame(all_varieties)
+            variety_scores.columns = ["Trial "+str(x) for x in range(number_of_samples)]
+            combos = pandas.DataFrame(all_combs)
+            combos.columns = ["Teammate "+str(x+1) for x in range(team_size)]
+            temp = pandas.concat([combos, variety_scores], axis=1)
+            temp.to_csv(results_file)
+
+        return all_varieties, all_combs, treatments
 
     def remove_participants(self, variable, value):
-        self.participant_data = self.participant_data.loc[self.participant_data[variable] == value]
+        self.participant_data = self.participant_data.loc[self.participant_data[variable] != value]
         self.participant_data.reset_index(drop=True, inplace=True)
 
 
