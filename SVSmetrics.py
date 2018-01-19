@@ -25,15 +25,26 @@ class Corpus(object):
     def compute_individual_variety(self) -> None:
         for i in range(self.participant_data.shape[0]):
             temp = self.design_data.loc[self.design_data['ParticipantID'] == self.participant_data['ParticipantID'][i]]
-            self.participant_data.set_value(i, 'VarietyScore', self._compute_variety(temp, [10, 6, 3, 1]))
+            self.participant_data.set_value(i, 'VarietyScore', self._compute_variety(temp, [10, 5, 2, 1]))
 
     def _compute_variety(self, data: DataFrame, weights: list) -> float:
         variety = 0
+        # for i, level in enumerate(self.genealogy_levels):
+        #     variety += weights[i]*len(numpy.unique(data[level]))
+        # variety /= data.shape[0]
+        nlast = 1
         for i, level in enumerate(self.genealogy_levels):
-            variety += weights[i]*len(numpy.unique(data[level]))
-        variety /= data.shape[0]
+            # Remove duplicates
+            temp = data.drop_duplicates(self.genealogy_levels[0:(i+1)], inplace=False)
 
-        return variety
+            # Find how many unique rows
+            n = temp.shape[0]
+
+            # Update variety
+            variety += weights[i]*(n-nlast)
+            nlast = n
+
+        return variety/data.shape[0]
 
     def _check_tables(self) -> None:
         # Make sure design identifiers are unique
@@ -154,10 +165,15 @@ def plot_varieties(varieties, combinations, combs_to_show=[], sort=False) -> Non
     xtl = []
     for comb in combs_to_show:
         for idx, combination in enumerate(combinations):
-            print(combination, comb, list(combination)==comb)
-            if list(combination) == comb:
+            if set(combination) == set(comb):
                 xt.append(idx)
                 xtl.append(str(comb).replace("[", '').replace(", ", "").replace("]", ""))
+
+    # Add the best and worst
+    xt.append(0)
+    xt.append(len(m)-1)
+    xtl.append(str(combinations[0]).replace("[", '').replace(",", "").replace(" ", "").replace("]", ""))
+    xtl.append(str(combinations[-1]).replace("[", '').replace(",", "").replace(" ", "").replace("]", ""))
 
     ax.bar(xt, m[xt], color='orange')
 
