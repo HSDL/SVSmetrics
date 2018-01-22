@@ -24,7 +24,7 @@ class Corpus(object):
         self.genealogy_levels = []
         self.weights = []
 
-    def compute_individual_variety(self) -> None:
+    def compute_individual_variety(self, output_file=None) -> None:
         for i in range(self.participant_data.shape[0]):
             print(self.participant_data['ParticipantID'][i])
             temp = self.design_data.loc[self.design_data['ParticipantID'] == self.participant_data['ParticipantID'][i]]
@@ -32,6 +32,8 @@ class Corpus(object):
                 self.participant_data.set_value(i, 'VarietyScore', 0)
             else:
                 self.participant_data.set_value(i, 'VarietyScore', self._compute_variety(temp))
+
+        self.participant_data.to_csv(output_file)
 
     def _compute_variety(self, data: DataFrame) -> float:
         variety = 0
@@ -135,7 +137,7 @@ def individual(camv: list) -> dict:
     return {"Complexity": complexity, "Analogical": analogical_distance, "Modality": modality, "Level": level}
 
 
-def plot_varieties(varieties, combinations, combs_to_show=[], sort=False) -> None:
+def plot_varieties(varieties, combinations, combs_to_show=None, sort=False) -> None:
     ax = matplotlib.pyplot.axes()
 
     # get means and stds

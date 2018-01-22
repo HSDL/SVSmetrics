@@ -9,10 +9,11 @@ temp.genealogy_levels = ['PhysicalPrinciple', 'WorkingPrinciple', 'Embodiment']
 temp.weights = [10, 5, 2, 1]
 
 # Remove seniors
-temp.remove_participants("Level", 1)
+# temp.remove_participants("Level", 1)
 
 # Compute variety for individuals
-temp.compute_individual_variety()
+individual_file = pkg_resources.resource_filename('sensitive_data', 'individual_variety.csv')
+temp.compute_individual_variety(individual_file)
 
 # Get all conditions
 treatment_file = pkg_resources.resource_filename('sensitive_data', 'treatments.csv')
