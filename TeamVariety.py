@@ -32,8 +32,8 @@ class Corpus(object):
                 self.participant_data.set_value(i, 'VarietyScore', 0)
             else:
                 self.participant_data.set_value(i, 'VarietyScore', self._compute_variety(temp))
-
-        self.participant_data.to_csv(output_file)
+        if output_file is not None:
+            self.participant_data.to_csv(output_file)
 
     def _compute_variety(self, data: DataFrame) -> float:
         variety = 0
@@ -49,7 +49,7 @@ class Corpus(object):
             variety += self.weights[i]*(n-nlast)
             nlast = n
 
-        return variety/data.shape[0]
+        return variety
 
     def _check_tables(self) -> None:
         # Make sure design identifiers are unique
