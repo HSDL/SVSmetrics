@@ -8,10 +8,9 @@ class Test(unittest.TestCase):
     def test_null(self) -> None:
         # Read in the data
         temp = TeamVariety.Corpus(pkg_resources.resource_filename('tests', 'designs.csv'),
-                                  pkg_resources.resource_filename('tests', 'participants.csv'))
-
-        temp.genealogy_levels = ['PhysicalPrinciple', 'WorkingPrinciple', 'Embodiment']
-        temp.weights = [10, 5, 2, 1]
+                                  pkg_resources.resource_filename('tests', 'participants.csv'),
+                                  ['PhysicalPrinciple', 'WorkingPrinciple', 'Embodiment'],
+                                  [10, 5, 2, 1])
 
         # Make sure we're only dealing with one level
         temp.remove_participants("Level", 1)
