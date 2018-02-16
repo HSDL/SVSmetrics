@@ -11,7 +11,7 @@ DataFrame = typing.TypeVar('pandas.core.frame.DataFrame')
 
 class Corpus(object):
 
-    def __init__(self, design_file_name: str, participant_file_name: str) -> None:
+    def __init__(self, design_file_name: str, participant_file_name: str, genealogy_levels: list, weights: list) -> None:
         # Read in the data
         self.design_data = pandas.read_csv(design_file_name)
         self.participant_data = pandas.read_csv(participant_file_name)
@@ -21,8 +21,12 @@ class Corpus(object):
         self._check_tables()
 
         # Define dummies
-        self.genealogy_levels = []
-        self.weights = []
+        self.genealogy_levels = genealogy_levels
+        self.weights = weights
+
+        # Drop columns that aren't included in list
+        items_to_drop = list(set(list(self.design_data)) - set(self.genealogy_levels + ["ParticipantID", "DesignID"]))
+        print(items_to_drop)
 
     def compute_individual_variety(self, output_file=None) -> None:
         for i in range(self.participant_data.shape[0]):
@@ -36,8 +40,10 @@ class Corpus(object):
             self.participant_data.to_csv(output_file)
 
     def _compute_variety(self, data: DataFrame) -> float:
+        # Initialize some things
         variety = 0
         nlast = 1
+
         for i, level in enumerate(self.genealogy_levels):
             # Remove duplicates
             temp = data.drop_duplicates(self.genealogy_levels[0:(i+1)], inplace=False)
