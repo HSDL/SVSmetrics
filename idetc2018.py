@@ -83,7 +83,7 @@ for i, level in enumerate(levels):
                                  [level], [weights[i]])
 
     # Remove freshmen
-    seniors.remove_participants("Level", 0)
+    seniors.remove_participants("Level", 1)
 
     # Remove physical modality
     seniors.remove_participants("Modality", 1)

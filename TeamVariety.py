@@ -16,6 +16,7 @@ class Corpus(object):
         self.design_data = pandas.read_csv(design_file_name)
         self.participant_data = pandas.read_csv(participant_file_name)
         self.participant_data['VarietyScore'] = numpy.zeros(self.participant_data.shape[0])
+        self.participant_data['NumberOfConcepts'] = numpy.zeros(self.participant_data.shape[0])
 
         # Check the table to make sure its ok
         self._check_tables()
@@ -27,11 +28,13 @@ class Corpus(object):
         # Drop columns that aren't included in list
         items_to_drop = list(set(list(self.design_data)) - set(self.genealogy_levels + ["ParticipantID", "DesignID"]))
         print(items_to_drop)
+        self.design_data.drop(items_to_drop, axis=1)
 
     def compute_individual_variety(self, output_file=None) -> None:
         for i in range(self.participant_data.shape[0]):
-            print(self.participant_data['ParticipantID'][i])
+            # print(self.participant_data['ParticipantID'][i])
             temp = self.design_data.loc[self.design_data['ParticipantID'] == self.participant_data['ParticipantID'][i]]
+            self.participant_data.set_value(i, 'NumberOfConcepts', temp.shape[0])
             if temp.shape[0] == 0:
                 self.participant_data.set_value(i, 'VarietyScore', 0)
             else:
@@ -114,7 +117,7 @@ class Corpus(object):
         all_combs = []
         all_varieties = []
         for comb in itertools.combinations_with_replacement(range(len(treatments)), team_size):
-            print(comb)
+            # print(comb)
             varieties = self.get_condition(number_of_samples, treatments[comb[0]],
                                            treatments[comb[1]], treatments[comb[2]], treatments[comb[3]])
             all_combs.append(comb)
@@ -170,7 +173,7 @@ def plot_varieties(varieties, combinations, combs_to_show=None, sort=False) -> N
         else:
             idx = range(len(m))
 
-        print(combinations)
+        # print(combinations)
 
         combinations = combinations[idx, :]
         m = m[idx]
