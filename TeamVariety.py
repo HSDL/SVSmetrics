@@ -124,11 +124,22 @@ class Corpus(object):
             all_varieties.append(varieties)
 
         if results_file is not None:
-            variety_scores = pandas.DataFrame(all_varieties)
-            variety_scores.columns = ["Trial "+str(x) for x in range(number_of_samples)]
-            combos = pandas.DataFrame(all_combs)
-            combos.columns = ["Teammate "+str(x+1) for x in range(team_size)]
-            temp = pandas.concat([combos, variety_scores], axis=1)
+            # variety_scores = pandas.DataFrame(all_varieties)
+            # variety_scores.columns = ["Trial "+str(x) for x in range(number_of_samples)]
+            # combos = pandas.DataFrame(all_combs)
+            # combos.columns = ["Teammate "+str(x+1) for x in range(team_size)]
+            # temp = pandas.concat([combos, variety_scores], axis=1)
+            # temp.to_csv(results_file)
+
+            # Convert to make Mo Happy
+            all_data = []
+            for i in range(number_of_samples):
+                for j in range(len(all_combs)):
+                    new_row = [j] + list(all_combs[j]) + [i] + [all_varieties[j][i]]
+                    all_data.append(new_row)
+
+            temp = pandas.DataFrame(all_data)
+            temp.columns = ['Combination'] + ["Teammate."+str(x+1) for x in range(team_size)] + ['Trial'] + ['Variety']
             temp.to_csv(results_file)
 
         return all_varieties, all_combs, treatments
