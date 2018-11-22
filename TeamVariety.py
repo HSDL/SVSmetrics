@@ -67,7 +67,7 @@ class Corpus(object):
             raise IndexError('Design IDs are not unique.')
         # Make sure participant identifiers are unique
         if len(numpy.unique(self.design_data['ParticipantID'])) != self.participant_data.shape[0]:
-            raise IndexError('Design IDs are not unique.')
+            raise IndexError('Participant IDs are not unique.')
 
     def get_individuals(self, condition: dict) -> list:
         c = self.participant_data['Complexity'] == condition['Complexity']
@@ -79,13 +79,15 @@ class Corpus(object):
 
         return self.participant_data['ParticipantID'].loc[idx].tolist()
 
-    def get_condition(self, number_of_samples: int, member1: dict, member2: dict, member3: dict, member4: dict) -> list:
+    def get_condition(self, number_of_samples: int, member1: dict, member2: dict, member3: dict, member4: dict) -> tuple:
         member1_options = self.get_individuals(member1)
         member2_options = self.get_individuals(member2)
         member3_options = self.get_individuals(member3)
         member4_options = self.get_individuals(member4)
 
         varieties = []
+        total_concepts = []
+        average_novelties = []
         for _ in range(number_of_samples):
 
             # Select individuals
@@ -94,6 +96,7 @@ class Corpus(object):
             m3 = numpy.random.choice(member3_options, 1)[0]
             m4 = numpy.random.choice(member4_options, 1)[0]
 
+            # Compute variety
             team = pandas.concat([self.design_data.loc[self.design_data['ParticipantID'] == m1],
                                   self.design_data.loc[self.design_data['ParticipantID'] == m2],
                                   self.design_data.loc[self.design_data['ParticipantID'] == m3],
@@ -101,7 +104,17 @@ class Corpus(object):
 
             varieties.append(self._compute_variety(team))
 
-        return varieties
+            # Compute total number of concepts
+            total_concepts.append(len(team.index))
+
+            # Compute average novelties
+            average_novelties.append((float(self.participant_data.loc[self.participant_data['ParticipantID'] == m1, 'Novelty']) +
+                                      float(self.participant_data.loc[self.participant_data['ParticipantID'] == m2, 'Novelty']) +
+                                      float(self.participant_data.loc[self.participant_data['ParticipantID'] == m3, 'Novelty']) +
+                                      float(self.participant_data.loc[self.participant_data['ParticipantID'] == m4, 'Novelty']))/4.0)
+
+
+        return varieties, total_concepts, average_novelties
 
     def get_all_conditions(self, number_of_samples, team_size, treatment_file=None, results_file=None):
         treatments = []
@@ -116,12 +129,16 @@ class Corpus(object):
 
         all_combs = []
         all_varieties = []
+        all_concepts = []
+        all_novelties = []
         for comb in itertools.combinations_with_replacement(range(len(treatments)), team_size):
-            # print(comb)
-            varieties = self.get_condition(number_of_samples, treatments[comb[0]],
-                                           treatments[comb[1]], treatments[comb[2]], treatments[comb[3]])
+            varieties, concepts, novelties = self.get_condition(number_of_samples, treatments[comb[0]],
+                                                                treatments[comb[1]], treatments[comb[2]],
+                                                                treatments[comb[3]])
             all_combs.append(comb)
             all_varieties.append(varieties)
+            all_concepts.append(concepts)
+            all_novelties.append(novelties)
 
         if results_file is not None:
             # variety_scores = pandas.DataFrame(all_varieties)
@@ -135,11 +152,11 @@ class Corpus(object):
             all_data = []
             for i in range(number_of_samples):
                 for j in range(len(all_combs)):
-                    new_row = [j] + list(all_combs[j]) + [i] + [all_varieties[j][i]]
+                    new_row = [j] + list(all_combs[j]) + [i] + [all_varieties[j][i]] + [all_concepts[j][i]] + [all_novelties[j][i]]
                     all_data.append(new_row)
 
             temp = pandas.DataFrame(all_data)
-            temp.columns = ['Combination'] + ["Teammate."+str(x+1) for x in range(team_size)] + ['Trial'] + ['Variety']
+            temp.columns = ['Combination'] + ["Teammate."+str(x+1) for x in range(team_size)] + ['Trial'] + ['Variety'] + ['Number of Concepts'] + ['Novelty']
             temp.to_csv(results_file)
 
         return all_varieties, all_combs, treatments

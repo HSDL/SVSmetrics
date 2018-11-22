@@ -29,8 +29,8 @@ def run_a_case(levels, weights, remove, run_name):
     for i, level in enumerate(levels):
         # Read in the data
         participants = TeamVariety.Corpus(pkg_resources.resource_filename('sensitive_data', 'designs.csv'),
-                                     pkg_resources.resource_filename('sensitive_data', 'participants.csv'),
-                                     [level], [weights[i]])
+                                          pkg_resources.resource_filename('sensitive_data', 'participants.csv'),
+                                          [level], [weights[i]])
 
         # Remove things
         for key in remove:
